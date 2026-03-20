@@ -1,2 +1,9 @@
-
-[{"name": "LOG_001", "url": "video.mp4", "type": "internal"}]
+[
+  { "name": "begotten_1989.log", "url": "https://youtu.be/vvwGtlzTKYQ?si=TgJbAZ8xg-pnXRG8&t=75", "type": "external" },
+  { "name": "bohemian_grove.log", "url": "https://youtu.be/_lQGAltQ5Jg?si=5HC7g07gLzcvIDAK&t=4470", "type": "external" },
+  { "name": "come_with.log", "url": "log clips/come%20with.mp4", "type": "internal" },
+  { "name": "who_is_he.log", "url": "log clips/who%20is%20he.mp4", "type": "internal" },
+  { "name": "peptides.log", "url": "https://www.youtube.com/live/-ncjnYkkCmo?si=j298dVo9jOXjmZrS&t=6280", "type": "external" },
+  { "name": "gravedigger_mountain.log", "url": "log clips/gravedigger%20mountain.mp4", "type": "internal" },
+  { "name": "uniform.log", "url": "log clips/Woody%20Allen.mp4", "type": "internal" },
+]
