@@ -1,0 +1,11 @@
+[
+  { "name": "NIGHTMARE_VIBE", "url": "audio/nightmare.mp3" },
+  { "name": "SYSTEM_CHILL", "url": "audio/track2.mp4" }
+]
+    * **Structure for `data/terminal_files.json`**:
+```json
+[
+  { "name": "LOG_ENTRY_X", "url": "videos/logx.mp4", "type": "internal" },
+  { "name": "YOUTUBE_DEEP_DIVE", "url": "https://youtube.com/...", "type": "external" }
+]
+4.  **The Terminal**:
