@@ -1,2 +1,4 @@
-
-[{"name": "Song Name", "url": "audio/file.mp3"}]
+[
+  { "name": "NIGHTMARE_VIBE", "url": "audio/nightmare.mp3" },
+  { "name": "SYSTEM_CHILL", "url": "audio/track2.mp4" }
+]
