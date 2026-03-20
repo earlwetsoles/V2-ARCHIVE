@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHIVE_01 | RESTRICTED ACCESS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --terminal-green: #00ff41;
+            --terminal-red: #ff3e3e;
+            --terminal-bg: #0a0a0a;
+            --terminal-dim: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--terminal-bg);
+            color: white;
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+            margin: 0;
+            cursor: crosshair;
+        }
+
+        .glitch-text {
+            display: inline-block;
+            transition: color 0.2s;
+        }
+
+        .glitch-text:hover {
+            color: var(--terminal-red);
+            text-shadow: 2px 0 var(--terminal-green), -2px 0 blue;
+        }
+
+        .red-hover:hover {
+            color: var(--terminal-red) !important;
+            border-color: var(--terminal-red) !important;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 9999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .blinking-cursor {
+            width: 10px;
+            height: 18px;
+            background: var(--terminal-green);
+            display: inline-block;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .log-container::-webkit-scrollbar { width: 4px; }
+        .log-container::-webkit-scrollbar-thumb { background: #333; }
+
+        .recording-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--terminal-red);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .boot-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 10000;
+            padding: 2rem;
+            font-size: 14px;
+            overflow-y: auto;
+        }
+
+        #globe-container {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        #globe-container:active { cursor: grabbing; }
+
+        .window-frame {
+            border: 1px solid #333;
+            background: rgba(10, 10, 10, 0.95);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <!-- Boot Sequence -->
+    <div id="boot-sequence" class="boot-screen text-green-500 font-mono"></div>
+
+    <!-- Main UI -->
+    <div id="main-content" class="opacity-0 transition-opacity duration-1000 grid grid-cols-12 gap-8 max-w-7xl mx-auto">
+        
+        <!-- Left Column: Main Navigation -->
+        <main class="col-span-12 md:col-span-8">
+            <header class="mb-12">
+                <h1 id="main-title" class="text-6xl font-bold tracking-tighter mb-8">ARCHIVE_01</h1>
+                
+                <nav class="flex flex-col space-y-4 text-3xl font-light">
+                    <a href="galleries.html" target="_blank" class="glitch-text red-hover w-fit">01_GALLERY</a>
+                    <a href="utilities.html" target="_blank" class="glitch-text red-hover w-fit">02_WEB_TOOLS</a>
+                    <span class="text-gray-700 cursor-not-allowed w-fit" title="LOCKED">03_WRITINGS [ENCRYPTED]</span>
+                </nav>
+            </header>
+
+            <section class="mb-12">
+                <h2 class="text-sm text-gray-500 uppercase tracking-widest mb-4">Social Access Points</h2>
+                <div id="socials" class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <!-- Links populated by JS for sorting -->
+                </div>
+            </section>
+
+            <section>
+                <div class="bg-gray-900/30 p-4 border border-dashed border-gray-800 text-gray-600 text-xs italic">
+                    CLASSIFIED_SUBHEADING: [REDACTED BY SYSTEM ADMIN]
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Column: Widgets -->
+        <aside class="col-span-12 md:col-span-4 space-y-6">
+            <!-- System Log Widget -->
+            <div class="window-frame p-4 h-64 flex flex-col">
+                <div class="flex justify-between items-center mb-2 border-b border-gray-800 pb-1">
+                    <span class="text-[10px] uppercase tracking-widest text-gray-500">System Log</span>
+                    <span class="text-[10px] text-green-500">LIVE</span>
+                </div>
+                <div id="system-log" class="log-container overflow-y-auto flex-1 text-[11px] font-mono space-y-1">
+                    <!-- Logs appear here -->
+                </div>
+            </div>
+
+            <!-- Music Player Widget -->
+            <div class="window-frame p-4">
+                <div class="flex items-center mb-4">
+                    <div class="recording-dot"></div>
+                    <span id="track-name" class="text-xs truncate uppercase tracking-tighter text-gray-300">Idle...</span>
+                </div>
+                <div class="flex items-center space-x-4 mb-4">
+                    <button id="play-btn" class="text-xs border border-gray-700 px-3 py-1 red-hover transition-colors">PLAY</button>
+                    <button id="skip-btn" class="text-xs border border-gray-700 px-3 py-1 red-hover transition-colors">SKIP</button>
+                    <span id="track-time" class="text-[10px] text-gray-500 font-mono">00:00 / 00:00</span>
+                </div>
+                <!-- Visualizer -->
+                <canvas id="visualizer" class="w-full h-12 bg-black border-t border-gray-900 mb-2"></canvas>
+                <!-- Progress Bar -->
+                <div id="progress-container" class="w-full h-1 bg-gray-900 cursor-pointer relative">
+                    <div id="progress-bar" class="h-full bg-red-600 w-0 transition-all duration-100"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Terminal Prompt Anchor -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center space-x-2 cursor-pointer group" onclick="toggleTerminal()">
+        <span class="text-[10px] text-gray-600 group-hover:text-red-500 transition-colors uppercase">Initialize Console</span>
+        <div class="blinking-cursor"></div>
+    </div>
+
+    <!-- Command Prompt Window -->
+    <div id="terminal-window" class="fixed bottom-0 left-0 w-full bg-black border-t border-red-900/50 p-4 transform translate-y-full transition-transform duration-300 z-[10001] font-mono">
+        <div id="terminal-output" class="h-48 overflow-y-auto text-sm text-gray-400 mb-4 space-y-1"></div>
+        <div class="flex items-center text-red-500">
+            <span class="mr-2">></span>
+            <input type="text" id="terminal-input" placeholder="type 'help'..." class="bg-transparent border-none outline-none text-white w-full uppercase" autocomplete="off">
+        </div>
+    </div>
+
+    <!-- Global Monitor Window -->
+    <div id="globe-window" class="fixed inset-10 window-frame z-[10002] hidden flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center p-2 bg-gray-900">
+            <span class="text-[10px] tracking-widest px-2 uppercase">Global_Monitor_v2.0</span>
+            <button onclick="toggleGlobe()" class="text-gray-500 hover:text-red-500 px-2">✕</button>
+        </div>
+        <div id="globe-container"></div>
+    </div>
+
+    <!-- Video Player Overlay (For internal commands) -->
+    <div id="video-overlay" class="fixed inset-0 bg-black z-[10005] hidden flex items-center justify-center p-8">
+        <div class="relative max-w-4xl w-full aspect-video border border-red-900">
+            <video id="internal-video" class="w-full h-full" controls></video>
+            <button id="close-video" class="absolute -top-10 right-0 text-white hover:text-red-500 uppercase text-xs" onclick="closeVideo()">[ Close Connection ]</button>
+        </div>
+    </div>
+
+    <!-- Globe Toggle Trigger -->
+    <div class="fixed bottom-6 right-6 w-12 h-12 border border-gray-800 flex items-center justify-center cursor-pointer hover:border-red-500 transition-colors group" onclick="toggleGlobe()">
+        <svg class="w-6 h-6 text-gray-600 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 012.5 2.5V17m-12.5-12.5a9 9 0 1112.728 12.728L16.07 16.07M13.61 6.726a9 9 0 01-3.444 1.119"></path></svg>
+    </div>
+
+    <script>
+        const API_BASE = ""; // Path to GitHub repo base if needed
+        let user = null;
+
+        // Configuration for Socials
+        const links = [
+            { name: "CSFloat", url: "https://csfloat.com/stall/76561198136225158" },
+            { name: "iNaturalist", url: "https://www.inaturalist.org/observations?place_id=any&user_id=jiwt&verifiable=any" },
+            { name: "Letterboxd", url: "https://letterboxd.com/Jiwt/" },
+            { name: "LighterPack", url: "https://lighterpack.com/r/lim3hg" },
+            { name: "Twitch", url: "https://www.twitch.tv/Jiwt" }
+        ].sort((a, b) => a.name.localeCompare(b.name));
+
+        // --- BOOT SEQUENCE ---
+        const bootLines = [
+            "INITIALIZING ARCHIVE_01 KERNEL...",
+            "LOADING NETWORK_PROTOCOLS: TCP/IP, IPX/SPX, Gopher",
+            "MAC_ADDRESS: " + Array(6).fill(0).map(() => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':').toUpperCase(),
+            "CHECKING DATABASE INTEGRITY...",
+            "SUCCESS.",
+            "EYE_TRACKING: ENABLED",
+            "USER_BIOMETRICS: SCANNED",
+            "ACCESSING RESTRICTED PARTITIONS...",
+            "WELCOME, VISITOR."
+        ];
+
+        async function startBoot() {
+            const container = document.getElementById('boot-sequence');
+            for (let line of bootLines) {
+                const p = document.createElement('p');
+                container.appendChild(p);
+                await typeWriter(line, p, 20);
+                container.scrollTop = container.scrollHeight;
+                await new Promise(r => setTimeout(r, 200));
+            }
+            setTimeout(() => {
+                document.getElementById('boot-sequence').style.display = 'none';
+                document.getElementById('main-content').classList.remove('opacity-0');
+                initLog();
+            }, 1000);
+        }
+
+        function typeWriter(text, element, speed = 50) {
+            return new Promise(resolve => {
+                let i = 0;
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else {
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+        // --- SYSTEM LOG WIDGET ---
+        const logLines = [
+            "PACKET_LOSS: 0.02%", "ENCRYPTION_KEY_ROTATED", "PORT_8080_LISTENING", 
+            "GEO_LOCATION_FIXED", "MEMORY_LEAK_DETECTED: STABILIZED", "KERNEL_UPTIME: 432:12",
+            "DIVERGENCE_THRESHOLD: NOMINAL", "CSS_INJECTION_BLOCKED"
+        ];
+        const spookyLines = ["HEARTBEAT_DETECTED", "USER_DETECTED BEHIND YOU", "UNAUTHORIZED_LOOK_DETECTED"];
+
+        function initLog() {
+            const log = document.getElementById('system-log');
+            addLogEntry("FACECAM_ON", "green");
+            setTimeout(() => addLogEntry("EYE_TRACKING ENABLED", "green"), 500);
+
+            setInterval(() => {
+                const isSpooky = Math.random() > 0.85;
+                if (isSpooky) {
+                    const line = spookyLines[Math.floor(Math.random()*spookyLines.length)];
+                    addLogEntry(line, "red");
+                    if (line === "HEARTBEAT_DETECTED") {
+                        setTimeout(() => addLogEntry("USER_DETECTED BEHIND YOU", "red"), 1000);
+                    }
+                } else {
+                    addLogEntry(logLines[Math.floor(Math.random()*logLines.length)], "gray");
+                }
+            }, 2000);
+        }
+
+        function addLogEntry(text, color) {
+            const log = document.getElementById('system-log');
+            const p = document.createElement('div');
+            p.className = color === 'red' ? 'text-red-500 font-bold' : color === 'green' ? 'text-green-500' : 'text-gray-500';
+            p.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+            log.prepend(p);
+            if (log.childNodes.length > 50) log.lastChild.remove();
+        }
+
+        // --- MUSIC PLAYER ---
+        let audio = new Audio();
+        let tracks = [];
+        let currentTrackIdx = 0;
+        let audioCtx, analyser, dataArray, source;
+
+        async function initMusic() {
+            try {
+                const res = await fetch('data/tracks.json');
+                tracks = await res.json();
+                loadTrack(0);
+            } catch (e) { console.error("Tracks not found. Using placeholder."); }
+        }
+
+        function loadTrack(idx) {
+            if (!tracks.length) return;
+            const track = tracks[idx];
+            audio.src = track.url;
+            document.getElementById('track-name').innerText = track.name;
+        }
+
+        document.getElementById('play-btn').onclick = () => {
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('play-btn').innerText = "PAUSE";
+                initVisualizer();
+            } else {
+                audio.pause();
+                document.getElementById('play-btn').innerText = "PLAY";
+            }
+        };
+
+        document.getElementById('skip-btn').onclick = () => {
+            currentTrackIdx = (currentTrackIdx + 1) % tracks.length;
+            loadTrack(currentTrackIdx);
+            audio.play();
+        };
+
+        audio.ontimeupdate = () => {
+            const prog = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progress-bar').style.width = prog + "%";
+            const fmt = (s) => new Date(s * 1000).toISOString().substr(14, 5);
+            document.getElementById('track-time').innerText = `${fmt(audio.currentTime)} / ${fmt(audio.duration || 0)}`;
+        };
+
+        document.getElementById('progress-container').onclick = (e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        };
+
+        function initVisualizer() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 64;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+            drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            const ctx = canvas.getContext('2d');
+            const draw = () => {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const barWidth = (canvas.width / dataArray.length) * 2.5;
+                let x = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const barHeight = dataArray[i] / 2;
+                    ctx.fillStyle = `rgb(200, 50, 50)`;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            };
+            draw();
+        }
+
+        // --- COMMAND PROMPT ---
+        let terminalOpen = false;
+        let terminalFiles = [];
+        let commands = {};
+
+        async function initTerminal() {
+            try {
+                const resF = await fetch('data/terminal_files.json');
+                terminalFiles = await resF.json();
+                const resC = await fetch('data/commands.json');
+                commands = await resC.json();
+            } catch (e) {
+                // Initial example command if fetch fails
+                commands = { "TIMEWARP": { text: "ACTIVATE_TIMEWARP", sub: "SKIPPING 1 YEAR...", video: "oneyear.mp4", lockClose: true } };
+            }
+        }
+
+        function toggleTerminal() {
+            terminalOpen = !terminalOpen;
+            const win = document.getElementById('terminal-window');
+            win.style.transform = terminalOpen ? 'translateY(0)' : 'translateY(100%)';
+            if (terminalOpen) document.getElementById('terminal-input').focus();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '~') {
+                e.preventDefault();
+                toggleTerminal();
+            }
+        });
+
+        document.getElementById('terminal-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleCommand(e.target.value.toUpperCase());
+                e.target.value = '';
+            }
+        });
+
+        function handleCommand(cmd) {
+            const output = document.getElementById('terminal-output');
+            const addLine = (txt, color = "gray-400") => {
+                const p = document.createElement('div');
+                p.className = `text-${color}`;
+                p.innerText = `> ${txt}`;
+                output.appendChild(p);
+                output.scrollTop = output.scrollHeight;
+            };
+
+            addLine(cmd, "white");
+
+            if (cmd === 'HELP') {
+                addLine("AVAILABLE_COMMANDS: LIST, HELP, GLOBAL, " + Object.keys(commands).join(', '), "green-500");
+            } else if (cmd === 'LIST') {
+                terminalFiles.forEach(f => addLine(`${f.name} [${f.type.toUpperCase()}]`, "gray-500"));
+            } else if (cmd === 'GLOBAL') {
+                toggleGlobe();
+            } else if (commands[cmd]) {
+                const c = commands[cmd];
+                addLine(c.text, "red-500");
+                if (c.sub) addLine(c.sub, "red-500");
+                if (c.video) playInternalVideo(c.video, c.lockClose);
+            } else {
+                // Check if it's a file from LIST
+                const file = terminalFiles.find(f => f.name === cmd);
+                if (file) {
+                    if (file.type === 'external') window.open(file.url, '_blank');
+                    else playInternalVideo(file.url);
+                } else {
+                    addLine("UNKNOWN_COMMAND: SYSTEM_INTEGRITY_COMPROMISED", "red-500");
+                }
+            }
+        }
+
+        function playInternalVideo(url, lock = false) {
+            const overlay = document.getElementById('video-overlay');
+            const video = document.getElementById('internal-video');
+            const closeBtn = document.getElementById('close-video');
+            overlay.classList.remove('hidden');
+            video.src = url;
+            video.play();
+            closeBtn.style.display = lock ? 'none' : 'block';
+        }
+
+        function closeVideo() {
+            const overlay = document.getElementById('video-overlay');
+            const video = document.getElementById('internal-video');
+            video.pause();
+            overlay.classList.add('hidden');
+        }
+
+        // --- GLOBAL MONITOR (THREE.JS) ---
+        let globeScene, globeCamera, globeRenderer, globe;
+        let isGlobeOpen = false;
+
+        function toggleGlobe() {
+            isGlobeOpen = !isGlobeOpen;
+            document.getElementById('globe-window').style.display = isGlobeOpen ? 'flex' : 'none';
+            if (isGlobeOpen && !globeRenderer) initGlobe();
+        }
+
+        function initGlobe() {
+            const container = document.getElementById('globe-container');
+            globeScene = new THREE.Scene();
+            globeCamera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            globeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            globeRenderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(globeRenderer.domElement);
+
+            const geometry = new THREE.SphereGeometry(5, 64, 64);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x112244,
+                specular: 0x333333,
+                shininess: 5,
+                bumpScale: 0.05,
+            });
+            // Fake topography using procedural noise or vertex colors could go here
+            // Simplified for reliability:
+            globe = new THREE.Mesh(geometry, material);
+            globeScene.add(globe);
+
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            globeScene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 3, 5);
+            globeScene.add(directionalLight);
+
+            globeCamera.position.z = 15;
+
+            // Simple Drag Logic
+            let isDragging = false;
+            let prevX, prevY;
+            container.addEventListener('mousedown', (e) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging || !isGlobeOpen) return;
+                const deltaX = e.clientX - prevX;
+                const deltaY = e.clientY - prevY;
+                globe.rotation.y += deltaX * 0.005;
+                globe.rotation.x += deltaY * 0.005;
+                prevX = e.clientX;
+                prevY = e.clientY;
+            });
+
+            // Fetch points and add pins (simplified)
+            fetch('data/globe_points.json').then(r => r.json()).then(points => {
+                points.forEach(p => addPin(p.lat, p.lng, p.url));
+            }).catch(() => {});
+
+            function animateGlobe() {
+                if (isGlobeOpen) {
+                    requestAnimationFrame(animateGlobe);
+                    globeRenderer.render(globeScene, globeCamera);
+                }
+            }
+            animateGlobe();
+        }
+
+        function addPin(lat, lng, url) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lng + 180) * (Math.PI / 180);
+            const pinGeom = new THREE.SphereGeometry(0.1, 8, 8);
+            const pinMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const pin = new THREE.Mesh(pinGeom, pinMat);
+            pin.position.set(
+                -5 * Math.sin(phi) * Math.cos(theta),
+                5 * Math.cos(phi),
+                5 * Math.sin(phi) * Math.sin(theta)
+            );
+            globe.add(pin);
+            // Click detection would require Raycaster - kept lightweight for now
+        }
+
+        // --- GLITCH EFFECT ---
+        function applyGlitch() {
+            const targets = document.querySelectorAll('.glitch-text');
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            if (!target) return;
+
+            const original = target.innerText;
+            const chars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+            let count = 0;
+            const interval = setInterval(() => {
+                target.innerText = original.split('').map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+                count++;
+                if (count > 10) {
+                    clearInterval(interval);
+                    target.innerText = original;
+                }
+            }, 50);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            // Populate Socials
+            const socialsCont = document.getElementById('socials');
+            links.forEach(l => {
+                const a = document.createElement('a');
+                a.href = l.url;
+                a.target = "_blank";
+                a.className = "border border-gray-800 p-2 red-hover block text-center uppercase transition-all";
+                a.innerText = l.name;
+                socialsCont.appendChild(a);
+            });
+
+            startBoot();
+            initMusic();
+            initTerminal();
+            setInterval(applyGlitch, 6000);
+        };
+    </script>
+</body>
+</html>
